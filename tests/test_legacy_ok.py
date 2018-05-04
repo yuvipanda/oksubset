@@ -28,17 +28,17 @@ def test_ok_parse_simple_valid():
 
     responses = [test(global_env) for test in tests]
     # All tests should fail now
-    assert all([resp.grade == 0 for resp in responses])
+    assert all([resp.score == 0 for resp in responses])
 
     global_env['defined_variable'] = None
 
     # First test should pass now, but second should fail
     responses = [test(global_env) for test in tests]
-    assert responses[0].grade == 1
-    assert responses[1].grade == 0
+    assert responses[0].score == 1
+    assert responses[1].score == 0
 
     # Both tests should pass now
     global_env['seconds_in_a_minute'] = 60
     responses = [test(global_env) for test in tests]
-    assert responses[0].grade == 1
-    assert responses[1].grade == 1
+    assert responses[0].score == 1
+    assert responses[1].score == 1

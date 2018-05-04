@@ -98,7 +98,7 @@ class Notebook:
             global_env = inspect.stack()[1][0].f_globals
         for test in tests:
             resp = test(global_env)
-            if resp.grade == 0:
+            if resp.score == 0:
                 self._display(resp)
                 break
         else:

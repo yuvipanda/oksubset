@@ -2,16 +2,16 @@ import html
 
 
 class TestResult:
-    def __init__(self, grade, summary_mimebundle):
+    def __init__(self, score, summary_mimebundle):
         """
         Result of running a Test of some kind.
 
-        grade - float, the grade this test produced.
+        score - float, the score this test produced.
         summary_mimebundle - dict | string, mapping mimetypes to summaries.
                              If string is passed in, assume it is for mimetype 
                              text/plain.
         """
-        self.grade = grade
+        self.score = score
         if isinstance(summary_mimebundle, str):
             self.summary_mimebundle = {'text/plain': summary_mimebundle}
         else:
@@ -42,4 +42,4 @@ class TestResult:
         if not isinstance(other, TestResult):
             raise ValueError('Can not compare TestResult object with object of type {}'.format(type(other)))
 
-        return other.grade == self.grade and other.summary_mimebundle == self.summary_mimebundle
+        return other.score == self.score and other.summary_mimebundle == self.summary_mimebundle

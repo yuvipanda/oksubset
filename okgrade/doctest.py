@@ -55,8 +55,8 @@ class SingleDocTest:
             doctestrunner.run(test, clear_globs=False)
         with open('/dev/null', 'w') as f, redirect_stderr(f), redirect_stdout(f):
             result = doctestrunner.summarize(verbose=True)
-        grade = 1.0 - (result.failed / result.attempted)
-        if grade == 1.0:
+        score = 1.0 - (result.failed / result.attempted)
+        if score == 1.0:
             summary = 'Test {} passed!'.format(self.name)
         else:
             summary = self.PLAIN_TEXT_SUMMARY_TEMPLATE.format(
@@ -64,4 +64,4 @@ class SingleDocTest:
                 doctest_string=dedent(self.doctest_string),
                 runresults=runresults.getvalue()
             )
-        return TestResult(grade, summary)
+        return TestResult(score, summary)
