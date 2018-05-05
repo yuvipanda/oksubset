@@ -1,7 +1,7 @@
 import os
 from textwrap import dedent
-from okgrade.doctest import SingleDocTest
-from okgrade.result import TestResult
+from scoraptor.doctest import SingleDocTest
+from scoraptor.result import TestResult
 
 def test_make_test_pass():
     """

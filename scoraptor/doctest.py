@@ -3,11 +3,11 @@ import io
 from contextlib import redirect_stderr, redirect_stdout
 from textwrap import dedent
 
-from okgrade.result import TestResult
+from scoraptor.result import TestResult
 
 class SingleDocTest:
     """
-    A single DocTest.
+    A single DocTest based test.
 
     Instances of this class are callable. When called, it takes 
     a global_environment dict, and returns a TestResult object.
@@ -25,7 +25,7 @@ class SingleDocTest:
             name
         )
 
-    PLAIN_TEXT_SUMMARY_TEMPLATE = dedent(r"""
+    PLAIN_TEXT_FAILURE_SUMMARY_TEMPLATE = dedent(r"""
     Test {name} failed!
 
     Test code:
@@ -59,7 +59,7 @@ class SingleDocTest:
         if score == 1.0:
             summary = 'Test {} passed!'.format(self.name)
         else:
-            summary = self.PLAIN_TEXT_SUMMARY_TEMPLATE.format(
+            summary = self.PLAIN_TEXT_FAILURE_SUMMARY_TEMPLATE.format(
                 name=self.name,
                 doctest_string=dedent(self.doctest_string),
                 runresults=runresults.getvalue()

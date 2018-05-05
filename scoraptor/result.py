@@ -36,7 +36,8 @@ class TestResult:
         if 'text/html' in self.summary_mimebundle:
             return self.get_summary('text/html')
         else:
-            return '<pre>' + html.escape(self.get_summary('text/plain')) + '</pre>'
+            return '<strong>Score: ' + html.escape(str(self.score)) + '</strong>' + \
+                   '<pre>' + html.escape(self.get_summary('text/plain')) + '</pre>'
 
     def __eq__(self, other):
         if not isinstance(other, TestResult):

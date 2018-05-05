@@ -2,49 +2,16 @@
 Backwards compatibility shim for old okpy API
 """
 import os
+from glob import glob
 import inspect
-from okgrade.doctest import SingleDocTest
+import statistics
+from okgrade.parser import parse_ok_test
+from scoraptor.runner import TestBundle
 
-def parse_ok_test(path):
-    """
-    Parse a ok test file & return list of SingleDocTests.
-    """
-    # ok test files are python files, with a global 'test' defined
-    test_globals = {}
-    with open(path) as f:
-        exec(f.read(), test_globals)
-    
-    test_spec = test_globals['test']
-
-    # We only support a subset of these tests, so let's validate!
-
-    # Make sure there is a name
-    assert 'name' in test_spec
-
-    # Do not support multiple suites in the same file
-    assert len(test_spec['suites']) == 1
-
-    # Do not support point values other than 1
-    assert test_spec['points'] == 1
-
-    test_suite = test_spec['suites'][0]
-
-    # Only support doctest. I am unsure if other tests are implemented
-    assert test_suite['type'] == 'doctest'
-
-    # Not setup and teardown supported
-    assert not bool(test_suite.get('setup'))
-    assert not bool(test_suite.get('teardown'))
-
-    tests = []
-
-    for i, test_case in enumerate(test_spec['suites'][0]['cases']):
-        tests.append(SingleDocTest(
-            test_spec['name'] + ' ' + str(i + 1),
-            test_case['code']
-        ))
-
-    return tests
+def _all_pass_score_reduce_func(scores):
+    if all([s == 1.0 for s in scores]):
+        return 1
+    return 0
 
 class Notebook:
     def __init__(self, okfile):
@@ -87,19 +54,33 @@ class Notebook:
         # FIXME: A warning here?
         pass
 
-    def grade(self, question, global_env=None):
-        path = os.path.join(self.basedir, "tests", "{}.py".format(question))
-        tests = parse_ok_test(path)
+    def grade_glob(self, question_glob, global_env=None):
+        test_files = glob(question_glob)
+        tests = []
+        for tf in test_files:
+            # In each file, all tests must pass to get a score!
+            tests.append(TestBundle(parse_ok_test(tf), score_reduce_func=_all_pass_score_reduce_func))
+        # Across all files, total score is mean of all scores.
+        # Also we don't want to stop when one test fails
+        test_bundle = TestBundle(tests, stop_on_fail=False, score_reduce_func=statistics.mean)
         if global_env is None:
             # Get the global env of our callers - one level below us in the stack
             # The grade method should only be called directly from user / notebook
             # code. If some other method is calling it, it should also use the
             # inspect trick to pass in its parents' global env.
-            global_env = inspect.stack()[1][0].f_globals
-        for test in tests:
-            resp = test(global_env)
-            if resp.score == 0:
-                self._display(resp)
-                break
-        else:
-            self._display('Tests passed!')
+            global_env = inspect.currentframe().f_back.f_globals
+        return test_bundle(global_env)
+
+
+    def grade(self, question, global_env=None):
+        path = os.path.join(self.basedir, "tests", "{}.py".format(question))
+
+        tests = TestBundle(parse_ok_test(path), score_reduce_func=_all_pass_score_reduce_func)
+        if global_env is None:
+            # Get the global env of our callers - one level below us in the stack
+            # The grade method should only be called directly from user / notebook
+            # code. If some other method is calling it, it should also use the
+            # inspect trick to pass in its parents' global env.
+            global_env = inspect.currentframe().f_back.f_globals
+        result = tests(global_env)
+        return result
