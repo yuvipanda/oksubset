@@ -1,2 +1,1 @@
-# okgrade
-Small implementation of the grading parts of OKPy
+# Moved to [grading/okgrade](https://github.com/grading/okgrade)
